@@ -15,7 +15,7 @@ class Room extends Component {
   }
 
   handleClickReset() {
-    axios.get("/welcome/reset")
+    axios.get(SERVER_HOST + "/welcome/reset")
       .then(response => {
             console.log(response)
         })
