@@ -1,3 +1,8 @@
 {
-  "root": "build/"
+  "root": "build/",
+  "proxies": {
+    "/api/": {
+      "origin": "https://funbig2.herokuapp.com/"
+    }
+  }
 }
