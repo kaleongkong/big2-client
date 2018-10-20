@@ -2,6 +2,7 @@
   "name": "client",
   "version": "0.1.0",
   "private": true,
+  "proxy": "https://funbig2.herokuapp.com",
   "dependencies": {
     "actioncable": "^5.2.1",
     "ajv": "^6.5.4",
