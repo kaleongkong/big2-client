@@ -4,6 +4,7 @@ import {SERVER_HOST} from './api-config';
 
 class Room extends Component {
   handleClick(user_id) {
+    this.props.updateUser('user'+user_id);
     axios.get(SERVER_HOST + "/welcome/join_room?user=user"+user_id)
       .then(response => {
           this.props.updateGameFrame(response.data)

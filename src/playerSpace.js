@@ -18,7 +18,7 @@ class PlayerSpace extends Component {
                     {value: '3', pattern: 'Square'},
                     {value: '2', pattern: 'Square'},
                     {value: '6', pattern: 'Heart'}];
-    this.state = {rawCards: rawCards};
+    this.state = {rawCards: this.props.cards};
     this.hand = [];
   }
 

@@ -14,8 +14,10 @@ class GameFrame extends Component {
     this.state = {
       startState: 0,
       recentCombination: [],
+      cards: [],
       sub: null,
-      moveSub: null
+      moveSub: null,
+      user: null
     }
   }
 
@@ -30,9 +32,15 @@ class GameFrame extends Component {
     });
   }
 
+  updateUser(userId) {
+    if (!this.state.user) {
+      this.setState({user: userId});
+    }
+  }
+
   updateGameFrame(data){
     if (this.state.startState !== data.start_state) {
-      this.setState({startState: data.start_state});
+      this.setState({startState: data.start_state, cards: data[this.state.user]});
     }
   }
 
@@ -59,6 +67,7 @@ class GameFrame extends Component {
       case 0:
         content = <Room 
             updateGameFrame={this.updateGameFrame.bind(this)}
+            updateUser = {this.updateUser.bind(this)}
             sub = {this.state.sub}/>
         break;
       case 1:
@@ -68,7 +77,8 @@ class GameFrame extends Component {
             </div>
             <PlayerSpace 
             updateRecentCombination={this.updateRecentCombination.bind(this)}
-            sub = {this.state.moveSub} /></div>)
+            sub = {this.state.moveSub} 
+            cards = {this.state.cards}/></div>)
         break;
       default:
     }
