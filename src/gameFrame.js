@@ -5,20 +5,29 @@ import CombinationDisplayBox from './combinationDisplayBox';
 import Room from './Room';
 import ActionCable from 'actioncable'
 import { WEBSOCKET_HOST } from './api-config';
+import './playerSpace.css';
+import './gameFrame.css';
 
 class GameFrame extends Component {
   constructor(props) {
     super(props);
     this.state = {
       startState: 0,
-      sub: null
+      recentCombination: [],
+      sub: null,
+      moveSub: null
     }
   }
 
   componentDidMount() {
     const cable = ActionCable.createConsumer(WEBSOCKET_HOST + '/cable');
-    this.setState({sub: cable.subscriptions.create('NotesChannel', {
-      received: this.updateGameFrame.bind(this)})});
+    this.setState(
+      {
+        sub: cable.subscriptions.create('NotesChannel', {
+      received: this.updateGameFrame.bind(this)}),
+        moveSub: cable.subscriptions.create('MovesChannel', {
+      received: this.updateRecentCombination.bind(this)}),
+    });
   }
 
   updateGameFrame(data){
@@ -27,15 +36,14 @@ class GameFrame extends Component {
     }
   }
 
-  render() {
-    const frameStyle = {
-      maxWidth: 600,
-      maxHeight: 600,
-      width: '100%',
-      height: '100%',
-      border: '1px solid',
-      position: 'relative'
+  updateRecentCombination(combination) {
+    console.log(combination);
+    if (this.state.recentCombination != combination) {
+      this.setState({recentCombination: combination})
     }
+  }
+
+  render() {
     const centerDisplayStyle = {
       position: 'absolute',
       width: '70%',
@@ -56,14 +64,16 @@ class GameFrame extends Component {
       case 1:
         content = 
           (<div><div style={centerDisplayStyle} className='center-display'>
-              <CombinationDisplayBox />
+              <CombinationDisplayBox rawCards={this.state.recentCombination}/>
             </div>
-            <PlayerSpace/></div>)
+            <PlayerSpace 
+            updateRecentCombination={this.updateRecentCombination.bind(this)}
+            sub = {this.state.moveSub} /></div>)
         break;
       default:
     }
     return (
-      <div style={frameStyle} className='game-frame'>
+      <div className='game-frame'>
         {content}
       </div>
     );

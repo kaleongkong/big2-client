@@ -1,6 +1,9 @@
 import React, {Component} from 'react';
 import './playerSpace.css';
 import Hand from './hand';
+import axios from 'axios';
+import ActionCable from 'actioncable'
+import {SERVER_HOST, WEBSOCKET_HOST } from './api-config';
 
 class PlayerSpace extends Component {
   constructor(props) {
@@ -29,7 +32,7 @@ class PlayerSpace extends Component {
     const remainedCards = []
     this.hand.forEach(function(card) {
       if (card.state.selected){
-        selectedCards.push(card.props.value)
+        selectedCards.push({value: card.props.value, pattern: card.props.pattern})
       } else {
         remainedRawCards.push({value: card.props.value, pattern: card.props.pattern})
         remainedCards.push(card);
@@ -38,6 +41,15 @@ class PlayerSpace extends Component {
     this.hand = remainedCards;
     console.log(selectedCards);
     this.setState({rawCards: remainedRawCards});
+    // axios.post(SERVER_HOST + "/welcome/move", {combination: selectedCards})
+    //   .then(response => {
+    //       console.log(response.data)
+    //       this.props.updateRecentCombination(response.data)
+    //     })
+    //     .catch(error => console.log(error))
+    if (this.props.sub) {
+      this.props.sub.send({combination: selectedCards})
+    }
   }
 
   render() {
