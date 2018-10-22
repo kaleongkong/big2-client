@@ -39,19 +39,31 @@ class GameFrame extends Component {
   }
 
   updateGameFrame(data){
+    console.log('updateGameFrame')
+    console.log(this.state);
     if (this.state.startState !== data.start_state) {
-      this.setState({startState: data.start_state, cards: data[this.state.user]});
+      this.setState({startState: data[this.state.user].start_state, cards: data[this.state.user].deck});
     }
   }
 
-  updateRecentCombination(combination) {
-    console.log(combination);
-    if (this.state.recentCombination != combination) {
+  updateRecentCombination(data) {
+    const combination = data.combination
+    console.log('updateRecentCombination')
+    console.log(data);
+    if (this.state.recentCombination !== combination) {
       this.setState({recentCombination: combination})
+    }
+    if (this.state.user === 'user1') {
+      this.updateGameFrame({'user1' : {start_state: data.users[0].game_state}})
+    } else if (this.state.user === 'user2'){
+      this.updateGameFrame({'user2' : {start_state: data.users[1].game_state}})
     }
   }
 
   render() {
+    console.log('render');
+    console.log(this.state)
+    console.log(this.state.startState === 1)
     const centerDisplayStyle = {
       position: 'absolute',
       width: '70%',
@@ -70,7 +82,7 @@ class GameFrame extends Component {
             updateUser = {this.updateUser.bind(this)}
             sub = {this.state.sub}/>
         break;
-      case 1:
+      default:
         content = 
           (<div><div style={centerDisplayStyle} className='center-display'>
               <CombinationDisplayBox rawCards={this.state.recentCombination}/>
@@ -78,9 +90,10 @@ class GameFrame extends Component {
             <PlayerSpace 
             updateRecentCombination={this.updateRecentCombination.bind(this)}
             sub = {this.state.moveSub} 
-            cards = {this.state.cards}/></div>)
+            cards = {this.state.cards}
+            current_player= {this.state.user}
+            buttonEnable = {this.state.startState === 1}/></div>)
         break;
-      default:
     }
     return (
       <div className='game-frame'>

@@ -48,21 +48,21 @@ class PlayerSpace extends Component {
     //     })
     //     .catch(error => console.log(error))
     if (this.props.sub) {
-      this.props.sub.send({combination: selectedCards})
+      this.props.sub.send({combination: selectedCards, last_player: this.props.current_player})
     }
   }
 
   render() {
     return (
       <div className='player-space'>
-        <div className='player-buttons'>
+        {this.props.buttonEnable ? (<div className='player-buttons'>
           <button className='confirm-button' onClick={this.handleClick.bind(this)}>
             Confirm
           </button>
           <button className='pass-button'>
             Pass
           </button>
-        </div>
+        </div>) : ""}
         <div className='player-hand'>
           <Hand
           rawCards={this.state.rawCards}
