@@ -63,7 +63,7 @@ class Card extends Component {
       className = {className}
       ref = {node => this.node = node}>
         <button style={buttonStyle}>
-          {this.props.value} {this.props.pattern}
+          {this.props.name} {this.props.patternName}
         </button>
       </div>
     );
@@ -71,7 +71,7 @@ class Card extends Component {
 }
 
 Card.defaultProps = {
-  value: 'Ace',
+  value: 12,
   pattern: 'Square',
   selected: false,
   interaction: true,

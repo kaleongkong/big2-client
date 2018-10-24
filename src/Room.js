@@ -8,11 +8,11 @@ class Room extends Component {
     axios.get(SERVER_HOST + "/welcome/join_room?user=user"+user_id)
       .then(response => {
           this.props.updateGameFrame(response.data)
+          if (this.props.sub) {
+            this.props.sub.send({user: 'user'+user_id})
+          }
         })
         .catch(error => console.log(error))
-    if (this.props.sub) {
-      this.props.sub.send({user: 'user'+user_id})
-    }
   }
 
   handleClickReset() {

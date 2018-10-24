@@ -8,16 +8,7 @@ import {SERVER_HOST, WEBSOCKET_HOST } from './api-config';
 class PlayerSpace extends Component {
   constructor(props) {
     super(props);
-    const rawCards=[{value: 'Ace', pattern: 'Square'}, 
-                    {value: 'Ace', pattern: 'Diamond'},
-                    {value: 'King', pattern: 'Square'},
-                    {value: 'King', pattern: 'Spade'},
-                    {value: '3', pattern: 'Diamond'},
-                    {value: '8', pattern: 'Square'},
-                    {value: '3', pattern: 'Spade'},
-                    {value: '3', pattern: 'Square'},
-                    {value: '2', pattern: 'Square'},
-                    {value: '6', pattern: 'Heart'}];
+    const rawCards=[];
     this.state = {rawCards: this.props.cards};
     this.hand = [];
   }
@@ -32,24 +23,38 @@ class PlayerSpace extends Component {
     const remainedCards = []
     this.hand.forEach(function(card) {
       if (card.state.selected){
-        selectedCards.push({value: card.props.value, pattern: card.props.pattern})
+        selectedCards.push({value: card.props.value, name: card.props.name, pattern: card.props.pattern, pattern_name: card.props.patternName})
       } else {
-        remainedRawCards.push({value: card.props.value, pattern: card.props.pattern})
+        remainedRawCards.push({value: card.props.value, name: card.props.name , pattern: card.props.pattern, pattern_name: card.props.patternName})
         remainedCards.push(card);
       }
     });
-    this.hand = remainedCards;
-    console.log(selectedCards);
-    this.setState({rawCards: remainedRawCards});
-    // axios.post(SERVER_HOST + "/welcome/move", {combination: selectedCards})
-    //   .then(response => {
-    //       console.log(response.data)
-    //       this.props.updateRecentCombination(response.data)
-    //     })
-    //     .catch(error => console.log(error))
-    if (this.props.sub) {
-      this.props.sub.send({combination: selectedCards, last_player: this.props.current_player})
-    }
+    axios.post(SERVER_HOST + "/welcome/move", {combination: selectedCards, user: this.props.current_player})
+      .then(response => {
+          console.log(response.data)
+          if (response.data.error) {
+            alert(response.data.error);
+          } else if (this.props.sub) {
+            this.hand = remainedCards;
+            this.setState({rawCards: remainedRawCards});
+            // this.props.updateRecentCombination(response.data)
+            this.props.sub.send({combination: selectedCards, last_player: this.props.current_player});
+          }
+        })
+        .catch(error => console.log(error))
+  }
+
+  handlePass(e) {
+    const params = {combination: [], last_player: this.props.current_player};
+    axios.post(SERVER_HOST + "/welcome/pass", params)
+      .then(response => {
+          console.log(response.data)
+          if (response.data.error) {
+            alert(response.data.error);
+          } else if (this.props.sub) {
+            this.props.sub.send(params);
+          }
+        }).catch(error => console.log(error))
   }
 
   render() {
@@ -59,7 +64,7 @@ class PlayerSpace extends Component {
           <button className='confirm-button' onClick={this.handleClick.bind(this)}>
             Confirm
           </button>
-          <button className='pass-button'>
+          <button className='pass-button' onClick={this.handlePass.bind(this)}>
             Pass
           </button>
         </div>) : ""}

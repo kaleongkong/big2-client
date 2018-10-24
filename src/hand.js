@@ -16,7 +16,9 @@ class Hand extends Component {
         key={`${rawCard.pattern}_${rawCard.value}`} 
         id={i} 
         value={rawCard.value}
+        name={rawCard.name}
         pattern={rawCard.pattern}
+        patternName={rawCard.pattern_name}
         interaction={this.props.interaction}
         updateHand={this.props.updateHand}/>);
       i++;
