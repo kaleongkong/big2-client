@@ -58,6 +58,9 @@ class GameFrame extends Component {
     } else if (this.state.user === 'user2'){
       this.updateGameFrame({'user2' : {start_state: data.users[1].game_state}})
     }
+    if (data.end_game && data.user !== this.state.user) {
+      alert('You Lose!')
+    }
   }
 
   render() {

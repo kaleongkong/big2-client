@@ -29,7 +29,8 @@ class PlayerSpace extends Component {
         remainedCards.push(card);
       }
     });
-    axios.post(SERVER_HOST + "/welcome/move", {combination: selectedCards, user: this.props.current_player})
+    const params = {combination: selectedCards, user: this.props.current_player, end_game: remainedCards.length === 0}
+    axios.post(SERVER_HOST + "/welcome/move", params)
       .then(response => {
           console.log(response.data)
           if (response.data.error) {
@@ -37,8 +38,11 @@ class PlayerSpace extends Component {
           } else if (this.props.sub) {
             this.hand = remainedCards;
             this.setState({rawCards: remainedRawCards});
-            // this.props.updateRecentCombination(response.data)
-            this.props.sub.send({combination: selectedCards, last_player: this.props.current_player});
+            params.last_player = this.props.current_player
+            this.props.sub.send(params);
+            if (response.data.end_game) {
+              alert('You win!')
+            }
           }
         })
         .catch(error => console.log(error))
@@ -46,15 +50,9 @@ class PlayerSpace extends Component {
 
   handlePass(e) {
     const params = {combination: [], last_player: this.props.current_player};
-    axios.post(SERVER_HOST + "/welcome/pass", params)
-      .then(response => {
-          console.log(response.data)
-          if (response.data.error) {
-            alert(response.data.error);
-          } else if (this.props.sub) {
-            this.props.sub.send(params);
-          }
-        }).catch(error => console.log(error))
+    if (this.props.sub) {
+      this.props.sub.send(params);
+    }
   }
 
   render() {
