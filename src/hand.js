@@ -40,8 +40,7 @@ class Hand extends Component {
 }
 
 Hand.defaultProps = {
-  rawCards: [{value: 'Ace', pattern: 'Square'}, 
-            {value: 'Ace', pattern: 'Diamond'}],
+  rawCards: [],
   interaction: true,
   updateHand: function(){}
 }

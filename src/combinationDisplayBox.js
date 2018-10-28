@@ -17,8 +17,7 @@ class CombinationDisplayBox extends Component {
 }
 
 CombinationDisplayBox.defaultProps = {
-  rawCards: [{value: 'King', pattern: 'Square'}, 
-            {value: 'King', pattern: 'Diamond'}],
+  rawCards: [],
   interaction: false
 }
 

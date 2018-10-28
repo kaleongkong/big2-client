@@ -2,13 +2,13 @@ import React, {Component} from 'react';
 import './playerSpace.css';
 import Hand from './hand';
 import axios from 'axios';
-import ActionCable from 'actioncable'
-import {SERVER_HOST, WEBSOCKET_HOST } from './api-config';
+// import ActionCable from 'actioncable'
+import {SERVER_HOST } from './api-config';
 
 class PlayerSpace extends Component {
   constructor(props) {
     super(props);
-    const rawCards=[];
+    // const rawCards=[];
     this.state = {rawCards: this.props.cards};
     this.hand = [];
   }
@@ -42,6 +42,7 @@ class PlayerSpace extends Component {
             this.props.sub.send(params);
             if (response.data.end_game) {
               alert('You win!')
+              this.props.resetGame();
             }
           }
         })
