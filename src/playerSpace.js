@@ -2,13 +2,11 @@ import React, {Component} from 'react';
 import './playerSpace.css';
 import Hand from './hand';
 import axios from 'axios';
-// import ActionCable from 'actioncable'
 import {SERVER_HOST } from './api-config';
 
 class PlayerSpace extends Component {
   constructor(props) {
     super(props);
-    // const rawCards=[];
     this.state = {rawCards: this.props.cards};
     this.hand = [];
   }
@@ -29,10 +27,9 @@ class PlayerSpace extends Component {
         remainedCards.push(card);
       }
     });
-    const params = {combination: selectedCards, user: this.props.current_player, end_game: remainedCards.length === 0}
+    const params = {combination: selectedCards, user: this.props.current_player, end_game: remainedCards.length === 0, room_id: this.props.roomId}
     axios.post(SERVER_HOST + "/welcome/move", params)
       .then(response => {
-          console.log(response.data)
           if (response.data.error) {
             alert(response.data.error);
           } else if (this.props.sub) {
@@ -50,7 +47,7 @@ class PlayerSpace extends Component {
   }
 
   handlePass(e) {
-    const params = {combination: [], last_player: this.props.current_player};
+    const params = {combination: [], last_player: this.props.current_player, room_id: this.props.roomId};
     if (this.props.sub) {
       this.props.sub.send(params);
     }
