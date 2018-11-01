@@ -23,17 +23,15 @@ const initialState = {
 class GameFrame extends Component {
   constructor(props) {
     super(props);
+    this.cable = ActionCable.createConsumer(WEBSOCKET_HOST + '/cable');
     this.state = initialState;
   }
 
   componentDidMount() {
-    const cable = ActionCable.createConsumer(WEBSOCKET_HOST + '/cable');
     this.setState(
       {
-        sub: cable.subscriptions.create('NotesChannel', {
+        sub: this.cable.subscriptions.create('NotesChannel', {
       received: this.updateGameFrame.bind(this)}),
-        moveSub: cable.subscriptions.create('MovesChannel', {
-      received: this.updateRecentCombination.bind(this)}),
     });
   }
 
@@ -46,11 +44,16 @@ class GameFrame extends Component {
   updateGameFrame(data){
     console.log(`this.state.user: ${this.state.user}`)
     if (this.state.user && this.state.gameState !== data.players_stats[this.state.user].game_state) {
-      this.setState({
+      const stateParams = {
         gameState: data.players_stats[this.state.user].game_state, 
         cards: data.players_stats[this.state.user].deck,
         roomId: data.room_id
-      });
+      }
+      if (!this.state.moveSub && data.room_id) {
+        stateParams.moveSub = this.cable.subscriptions.create({channel: 'MovesChannel', roomId: data.room_id}, {
+      received: this.updateRecentCombination.bind(this)})
+      }
+      this.setState(stateParams);
     } else {
       this.setState({roomId: data.room_id})
     }
@@ -133,6 +136,9 @@ class GameFrame extends Component {
     }
     return (
       <div className='game-frame'>
+      <div>
+        room id: {this.state.roomId}
+      </div>
         {content}
       </div>
     );

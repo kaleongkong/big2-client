@@ -5,6 +5,7 @@ import {SERVER_HOST} from './api-config';
 class Room extends Component {
   handleClick(user_id) {
     this.props.updateUser(user_id);
+    console.log(`this.props.roomId: ${this.props.roomId}`)
     const url = SERVER_HOST + "/welcome/join_room?user=" + user_id + (this.props.roomId ? `&room_id=${this.props.roomId}` : '')
     axios.get(url)
       .then(response => {
@@ -27,6 +28,7 @@ class Room extends Component {
     return (<div style={roomStyle}>
       <button onClick={this.handleClick.bind(this, 'user1')}> Player 1 </button>
       <button onClick={this.handleClick.bind(this, 'user2')}> Player 2 </button>
+      <button onClick={this.handleClick.bind(this, 'user3')}> Player 3 </button>
       </div>);
   }
 }
