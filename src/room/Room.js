@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import { SERVER_HOST } from '../api-config';
 import axios from 'axios';
+import './Room.css'
 
 class Room extends Component {
 
@@ -85,34 +86,14 @@ class Room extends Component {
   }
 
   render() {
-    const roomStyle = {
-      position: 'relative',
-      width: '100%',
-      height: '10%',
-      maxHeight: '50px',
-      fontSize: '12px'
-      // border: '1px solid'
-    }
-    const innerStyle = {
-      position: 'absolute',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      width: '100%',
-      height: '80%',
-      top: '10%',
-      maxHeight: '50px',
-      border: '1px solid'
-    }
-
     const is_participant = this.props.userIds.includes(this.props.currentPlayer);
     const is_owner = this.props.owner === this.props.currentPlayer;
     const deleteButton = is_owner ? (<button onClick={this.handleDelete.bind(this)}> Delete </button>) : ""
     const startButton = is_owner && this.props.userIds.length > 1 ? (<button onClick={this.handleStart.bind(this)}> Start </button>) : ""
     const joinButton = !is_owner && !is_participant && !this.props.currentRoomId ? <button onClick={this.handleJoinClick.bind(this)}> Join </button> : "";
     const leaveButton = !is_owner && is_participant ? <button onClick={this.handleLeaveClick.bind(this)}> Leave </button> : "";
-    return <div className='room-container' style={roomStyle}>
-      <div className='room' style={innerStyle}>
+    return <div className='room-container'>
+      <div className='room'>
         <div> Room {this.props.roomId} </div>
         {this.renderPlayerSection()}
         <div> limit {this.props.userIds.length}/{this.props.roomLimit} </div>

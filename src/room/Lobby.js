@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import Room from './Room'
+import './Lobby.css'
 
 class Lobby extends Component {
   handleCreateClick() {
@@ -7,13 +8,6 @@ class Lobby extends Component {
   }
 
   render() {
-    const lobbyStyle = {
-      position: 'absolute',
-      width: '90%',
-      height: '90%',
-      top: '9%',
-      left: '5%',
-    }
     const rooms = []
     console.log(this.props.rooms);
     this.props.rooms.forEach(function(room){
@@ -31,7 +25,7 @@ class Lobby extends Component {
                             handleDeleteRoom = {this.props.handleDeleteRoom.bind(this)}/>
       rooms.push(roomNode)
     }.bind(this));
-    return <div className='lobby' style={lobbyStyle}>
+    return <div className='lobby'>
       {this.props.showCreateButton ? <button onClick={this.handleCreateClick.bind(this)}> Create </button> : ''}
       {rooms}
     </div>

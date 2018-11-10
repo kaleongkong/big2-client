@@ -2,7 +2,6 @@ import React, {Component} from 'react';
 import TextBox from './textBox';
 import PlayerSpace from './playerSpace';
 import CombinationDisplayBox from './combinationDisplayBox';
-import Room from './Room';
 import ActionCable from 'actioncable'
 import { SERVER_HOST, WEBSOCKET_HOST } from './api-config';
 import {setCookie, getCookie} from './utils/helper'
@@ -15,7 +14,6 @@ const initialState = {
   gameState: 0,
   recentCombination: [],
   cards: [],
-  // sub: null,
   moveSub: null,
   roomSub: null,
   user: getCookie('userId'),
@@ -136,6 +134,10 @@ class GameFrame extends Component {
         cards: data.players_stats[this.state.user].deck,
         currentRoomId: data.room_id
       }
+      // Not necessary to check room_id, room_id has been checked in create room or join room 
+      if (!this.state.moveSub) {
+        stateParams.moveSub = this.cable.subscriptions.create({channel: 'MovesChannel', roomId: data.room_id}, {received: this.updateRecentCombination.bind(this)})
+      }
       this.setState(stateParams);
     } else {
       this.setState({currentRoomId: data.room_id})
@@ -143,10 +145,6 @@ class GameFrame extends Component {
   }
 
   updateRecentCombination(data) {
-    console.log('updateRecentCombination data: ');
-    console.log(data);
-    console.log('updateRecentCombination state: ');
-    console.log(this.state);
     const combination = data.combination;
     if (this.state.recentCombination !== combination) {
       this.setState({recentCombination: combination})
