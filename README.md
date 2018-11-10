@@ -3,6 +3,7 @@
 
 Bug:
 - King Full House shouldn't be bigger than Dee Full House
+- 2,3,4,5,6 should be valid but invalid
 
 Room:
 1. Make user name.

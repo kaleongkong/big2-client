@@ -36,8 +36,6 @@ class GameFrame extends Component {
     }
     this.setState(
       {
-      //   sub: this.cable.subscriptions.create('NotesChannel', {
-      // received: this.updateGameFrame.bind(this)}),
         roomSub: this.cable.subscriptions.create('RoomChannel', {
       received: this.updateLobby.bind(this)})
     });
@@ -52,11 +50,16 @@ class GameFrame extends Component {
           setCookie('userId', userId);
           const userRoomId = response.data.room_id;
           setCookie('currentRoomId', userRoomId);
-          this.setState({
+          const stateParams = {
             user: userId,
             rooms: listOfRooms,
             currentRoomId: userRoomId
-          });
+          };
+          if (userRoomId !== this.state.currentRoomId) {
+            stateParams.moveSub = this.cable.subscriptions.create({channel: 'MovesChannel', roomId: userRoomId}, {
+          received: this.updateRecentCombination.bind(this)})
+          }
+          this.setState(stateParams);
           this.state.roomSub.send({userAction: 'create'});
         })
         .catch(error => console.log(error))
@@ -65,16 +68,15 @@ class GameFrame extends Component {
   initUserAndUpdateLobby(userId, rooms, roomId) {
     setCookie('userId', userId);
     setCookie('currentRoomId', roomId);
-    this.setState({
+    const stateParams = {
       user: userId,
       rooms: rooms,
       currentRoomId: roomId
-    });
-    this.state.roomSub.send({userAction: 'join'});
-  }
-
-  handleJoinRoom(data) {
-    this.updateLobby(data);
+    }
+    if (roomId !== this.state.currentRoomId) {
+      stateParams.moveSub = this.cable.subscriptions.create({channel: 'MovesChannel', roomId: roomId}, {received: this.updateRecentCombination.bind(this)})
+    }
+    this.setState(stateParams);
     this.state.roomSub.send({userAction: 'join'});
   }
 
@@ -128,16 +130,11 @@ class GameFrame extends Component {
   }
 
   updateGameFrame(data){
-    console.log(`this.state.user: ${this.state.user}`)
     if (this.state.user && this.state.gameState !== data.players_stats[this.state.user].game_state) {
       const stateParams = {
         gameState: data.players_stats[this.state.user].game_state, 
         cards: data.players_stats[this.state.user].deck,
         currentRoomId: data.room_id
-      }
-      if (!this.state.moveSub && data.room_id !== this.state.userId) {
-        stateParams.moveSub = this.cable.subscriptions.create({channel: 'MovesChannel', roomId: data.room_id}, {
-      received: this.updateRecentCombination.bind(this)})
       }
       this.setState(stateParams);
     } else {
@@ -146,6 +143,10 @@ class GameFrame extends Component {
   }
 
   updateRecentCombination(data) {
+    console.log('updateRecentCombination data: ');
+    console.log(data);
+    console.log('updateRecentCombination state: ');
+    console.log(this.state);
     const combination = data.combination;
     if (this.state.recentCombination !== combination) {
       this.setState({recentCombination: combination})
@@ -183,7 +184,6 @@ class GameFrame extends Component {
     users[this.state.user] = {}
     users[this.state.user].game_state = 0
     this.updateGameFrame({players_stats: users});
-    console.log(this.state);
     setCookie('userId', '');
     setCookie('currentRoomId', '');
     this.setState({
@@ -221,12 +221,6 @@ class GameFrame extends Component {
         content = <TextBox/>
         break;
       case 0:
-        // content = <Room
-        //     updateGameFrame={this.updateGameFrame.bind(this)}
-        //     updateUser = {this.updateUser.bind(this)}
-        //     resetGame= {this.resetGame.bind(this)}
-        //     roomId = {this.state.currentRoomId}
-        //     sub = {this.state.sub}/>
         content = <Lobby
           showCreateButton = {!this.state.user}
           currentRoomId = {this.state.currentRoomId} 
@@ -236,12 +230,10 @@ class GameFrame extends Component {
           cable = {this.cable}
           initUserAndUpdateLobby = {this.initUserAndUpdateLobby.bind(this)}
           updateGameFrame = {this.updateGameFrame.bind(this)}
-          handleJoinRoom = {this.handleJoinRoom.bind(this)}
           handleLeaveRoom = {this.handleLeaveRoom.bind(this)}
           handleDeleteRoom = {this.handleDeleteRoom.bind(this)}/>
         break;
       default:
-        console.log(`this.state.currentRoomId: ${this.state.currentRoomId}`)
         content = 
           (<div>
             {this.state.user}

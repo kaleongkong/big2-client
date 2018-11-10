@@ -41,6 +41,10 @@ class Card extends Component {
     }
   }
 
+  dataObj() {
+    return {value: this.props.value, name: this.props.name, pattern: this.props.pattern, pattern_name: this.props.patternName}
+  }
+
   render() {
     const cardStyle = {
       height: 75,

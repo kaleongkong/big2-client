@@ -7,34 +7,58 @@ import {SERVER_HOST } from './api-config';
 class PlayerSpace extends Component {
   constructor(props) {
     super(props);
-    this.state = {rawCards: this.props.cards};
-    this.hand = [];
+    this.state = {
+      rawCards: this.props.cards,
+      selectedCards: {},
+      remainedRawCards: this.rawCardsHelper(this.props.cards)
+    };
+  }
+
+  rawCardsHelper(cards) {
+    const remainedRawCards = {};
+    cards.forEach(function(card) {
+      const id = `${card.value}-${card.pattern}`;
+      remainedRawCards[id] = card;
+    });
+    return remainedRawCards;
   }
 
   updateHand(card) {
-    this.hand[card.props.id] = card;
+    const id = `${card.props.value}-${card.props.pattern}`;
+    const newSelectedCards = Object.assign({}, this.state.selectedCards);
+    const newRemainedRawCards = Object.assign({}, this.state.remainedRawCards);
+    if (this.state.selectedCards[id] && !card.state.selected) {
+      delete newSelectedCards[id];
+      newRemainedRawCards[id] = card.dataObj();
+    } else if (!this.state.selectedCards[id] && card.state.selected){
+      newSelectedCards[id] = card.dataObj();
+      delete newRemainedRawCards[id];
+    }
+    if (Object.values(newSelectedCards).length !== Object.values(this.state.selectedCards).length) {
+      this.setState({
+        selectedCards: newSelectedCards,
+        remainedRawCards: newRemainedRawCards
+      });
+    }
   }
 
   handleClick(e) {
-    const selectedCards = []
-    const remainedRawCards = []
-    const remainedCards = []
-    this.hand.forEach(function(card) {
-      if (card.state.selected){
-        selectedCards.push({value: card.props.value, name: card.props.name, pattern: card.props.pattern, pattern_name: card.props.patternName})
-      } else {
-        remainedRawCards.push({value: card.props.value, name: card.props.name , pattern: card.props.pattern, pattern_name: card.props.patternName})
-        remainedCards.push(card);
-      }
-    });
-    const params = {combination: selectedCards, user: this.props.current_player, end_game: remainedCards.length === 0, room_id: this.props.roomId}
+    const selectedCards = Object.values(this.state.selectedCards);
+    const remainedRawCards = Object.values(this.state.remainedRawCards);
+    const params = {combination: selectedCards, user: this.props.current_player, end_game: remainedRawCards.length === 0, room_id: this.props.roomId}
     axios.post(SERVER_HOST + "/welcome/move", params)
       .then(response => {
+        console.log('playerSpace handleClick')
+        console.log(this.props)
+        console.log(response)
           if (response.data.error) {
             alert(response.data.error);
           } else if (this.props.sub) {
-            this.hand = remainedCards;
-            this.setState({rawCards: remainedRawCards});
+            this.setState({
+              rawCards: remainedRawCards,
+              selectedCards: {},
+              remainedRawCards: this.rawCardsHelper(remainedRawCards)
+            });
             params.last_player = this.props.current_player
             this.props.sub.send(params);
             if (response.data.end_game) {

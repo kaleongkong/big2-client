@@ -13,7 +13,6 @@ class Lobby extends Component {
       height: '90%',
       top: '9%',
       left: '5%',
-      // border: '1px solid'
     }
     const rooms = []
     console.log(this.props.rooms);
@@ -28,7 +27,6 @@ class Lobby extends Component {
                             cable = {this.props.cable}
                             updateGameFrame = {this.props.updateGameFrame.bind(this)}
                             initUserAndUpdateLobby = {this.props.initUserAndUpdateLobby.bind(this)}
-                            handleJoinRoom = {this.props.handleJoinRoom.bind(this)}
                             handleLeaveRoom = {this.props.handleLeaveRoom.bind(this)}
                             handleDeleteRoom = {this.props.handleDeleteRoom.bind(this)}/>
       rooms.push(roomNode)
