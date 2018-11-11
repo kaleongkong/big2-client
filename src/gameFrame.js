@@ -44,20 +44,11 @@ class GameFrame extends Component {
     axios.post(url)
       .then(response => {
           const userId = response.data.user_id;
-          const listOfRooms = response.data.rooms;
+          const rooms = response.data.rooms;
           setCookie('userId', userId);
-          const userRoomId = response.data.room_id;
-          setCookie('currentRoomId', userRoomId);
-          const stateParams = {
-            user: userId,
-            rooms: listOfRooms,
-            currentRoomId: userRoomId
-          };
-          if (userRoomId !== this.state.currentRoomId) {
-            stateParams.moveSub = this.cable.subscriptions.create({channel: 'MovesChannel', roomId: userRoomId}, {
-          received: this.updateRecentCombination.bind(this)})
-          }
-          this.setState(stateParams);
+          const roomId = response.data.room_id;
+          setCookie('currentRoomId', roomId);
+          this.setStateForNewUser(userId, rooms, roomId)
           this.state.roomSub.send({userAction: 'create'});
         })
         .catch(error => console.log(error))
@@ -66,6 +57,11 @@ class GameFrame extends Component {
   initUserAndUpdateLobby(userId, rooms, roomId) {
     setCookie('userId', userId);
     setCookie('currentRoomId', roomId);
+    this.setStateForNewUser(userId, rooms, roomId)
+    this.state.roomSub.send({userAction: 'join'});
+  }
+
+  setStateForNewUser(userId, rooms, roomId) {
     const stateParams = {
       user: userId,
       rooms: rooms,
@@ -75,7 +71,6 @@ class GameFrame extends Component {
       stateParams.moveSub = this.cable.subscriptions.create({channel: 'MovesChannel', roomId: roomId}, {received: this.updateRecentCombination.bind(this)})
     }
     this.setState(stateParams);
-    this.state.roomSub.send({userAction: 'join'});
   }
 
   handleLeaveRoom(data) {
