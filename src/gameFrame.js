@@ -1,5 +1,4 @@
 import React, {Component} from 'react';
-import TextBox from './textBox';
 import PlayerSpace from './playerSpace';
 import CombinationDisplayBox from './combinationDisplayBox';
 import ActionCable from 'actioncable'
@@ -11,9 +10,10 @@ import axios from 'axios';
 import Lobby from './room/Lobby';
 
 const initialState = {
-  gameState: 0,
+  gameState: parseInt(getCookie('gameState')) || 0,
   recentCombination: [],
   cards: [],
+  selectedCards: {},
   moveSub: null,
   roomSub: null,
   user: getCookie('userId'),
@@ -29,7 +29,26 @@ class GameFrame extends Component {
   }
 
   componentDidMount() {
-    if (this.state.rooms.length === 0) {
+    if (this.state.gameState !== 0) {
+      const url = SERVER_HOST + "/welcome/rejoin";
+      const params = {
+        user_id: this.state.user,
+        room_id: this.state.currentRoomId
+      }
+      axios.post(url, params)
+        .then(response => {
+            const newState = {
+              recentCombination: response.data.last_combination,
+              cards: response.data.hand
+            }
+            if (!this.state.moveSub) {
+              newState.moveSub = this.cable.subscriptions.create({channel: 'MovesChannel', roomId: this.state.currentRoomId}, 
+                {received: this.updateRecentCombination.bind(this)})
+            }
+            this.setState(newState);
+          })
+          .catch(error => console.log(error));
+    } else if (this.state.rooms.length === 0) {
       this.getRooms();
     }
     this.setState(
@@ -45,13 +64,13 @@ class GameFrame extends Component {
       .then(response => {
           const userId = response.data.user_id;
           const rooms = response.data.rooms;
-          setCookie('userId', userId);
           const roomId = response.data.room_id;
+          setCookie('userId', userId);
           setCookie('currentRoomId', roomId);
           this.setStateForNewUser(userId, rooms, roomId)
           this.state.roomSub.send({userAction: 'create'});
         })
-        .catch(error => console.log(error))
+        .catch(error => console.log(error));
   }
 
   initUserAndUpdateLobby(userId, rooms, roomId) {
@@ -133,6 +152,7 @@ class GameFrame extends Component {
       if (!this.state.moveSub) {
         stateParams.moveSub = this.cable.subscriptions.create({channel: 'MovesChannel', roomId: data.room_id}, {received: this.updateRecentCombination.bind(this)})
       }
+      setCookie('gameState', stateParams.gameState);
       this.setState(stateParams);
     } else {
       this.setState({currentRoomId: data.room_id})
@@ -147,6 +167,8 @@ class GameFrame extends Component {
     const users = {}
     users[this.state.user] = {}
     users[this.state.user].game_state = data.players_stats.users[this.state.user].game_state
+    users[this.state.user].deck = data.players_stats.users[this.state.user].hand
+    console.log(users);
     this.updateGameFrame({players_stats: users, room_id: this.state.currentRoomId})
     if (data.end_game && data.user !== this.state.user) {
       alert('You Lose!')
@@ -179,6 +201,7 @@ class GameFrame extends Component {
     this.updateGameFrame({players_stats: users});
     setCookie('userId', '');
     setCookie('currentRoomId', '');
+    setCookie('gameState', '');
     this.setState({
       user: null,
       recentCombination: []
@@ -186,18 +209,15 @@ class GameFrame extends Component {
     this.state.roomSub.send({userAction: 'endGame'});
   }
 
-  removeUserId() {
-    setCookie('userId', '');
-    this.setState({
-      user: null
-    })
-  }
-
-  removeRoomId() {
-    setCookie('currentRoomId', '');
-    this.setState({
-      currentRoomId: null
-    })
+  updateCards(cards, selectedCards) {
+    const newState = {}
+    if (cards) {
+      newState.cards = cards;
+    }
+    if (selectedCards) {
+      newState.selectedCards = selectedCards;
+    }
+    this.setState(newState);
   }
 
   render() {
@@ -233,6 +253,8 @@ class GameFrame extends Component {
             <PlayerSpace 
             updateRecentCombination={this.updateRecentCombination.bind(this)}
             updateGameFrame={this.updateGameFrame.bind(this)}
+            updateCards={this.updateCards.bind(this)}
+            selectedCards={this.state.selectedCards}
             resetGame= {this.resetGame.bind(this)}
             sub = {this.state.moveSub} 
             cards = {this.state.cards}
@@ -247,7 +269,7 @@ class GameFrame extends Component {
         room id: {this.state.currentRoomId}
         <br></br>
         user id: {this.state.user}
-        { true ? (<div><button onClick={this.removeUserId.bind(this)}> Remove user ID </button><button onClick={this.removeRoomId.bind(this)}> Remove room ID </button></div>) : ""}
+        { true ? (<div><button onClick={this.resetGameState.bind(this)}> Reset </button></div>) : ""}
       </div>
         {content}
       </div>

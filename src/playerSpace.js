@@ -5,31 +5,22 @@ import axios from 'axios';
 import {SERVER_HOST } from './api-config';
 
 class PlayerSpace extends Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      rawCards: this.props.cards,
-      selectedCards: {}
-    };
-  }
 
   updateHand(card) {
     const id = `${card.props.value}-${card.props.pattern}`;
-    const newSelectedCards = Object.assign({}, this.state.selectedCards);
-    if (this.state.selectedCards[id] && !card.state.selected) {
+    const newSelectedCards = Object.assign({}, this.props.selectedCards);
+    if (this.props.selectedCards[id] && !card.state.selected) {
       delete newSelectedCards[id];
-    } else if (!this.state.selectedCards[id] && card.state.selected){
+    } else if (!this.props.selectedCards[id] && card.state.selected){
       newSelectedCards[id] = card.dataObj();
     }
-    if (Object.values(newSelectedCards).length !== Object.values(this.state.selectedCards).length) {
-      this.setState({
-        selectedCards: newSelectedCards,
-      });
+    if (Object.values(newSelectedCards).length !== Object.values(this.props.selectedCards).length) {
+      this.props.updateCards(null, newSelectedCards);
     }
   }
 
   handleClick(e) {
-    const selectedCards = Object.values(this.state.selectedCards);
+    const selectedCards = Object.values(this.props.selectedCards);
     const params = {
       combination: selectedCards, 
       user: this.props.current_player,
@@ -39,10 +30,9 @@ class PlayerSpace extends Component {
           if (response.data.error) {
             alert(response.data.error);
           } else if (this.props.sub) {
-            this.setState({
-              rawCards: response.data.hand,
-              selectedCards: {},
-            });
+            console.log('move');
+            console.log(selectedCards);
+            this.props.updateCards(response.data.hand, {});
             params.last_player = this.props.current_player;
             params.end_game = response.data.end_game;
             this.props.sub.send(params);
@@ -75,7 +65,7 @@ class PlayerSpace extends Component {
         </div>) : ""}
         <div className='player-hand'>
           <Hand
-          rawCards={this.state.rawCards}
+          rawCards={this.props.cards}
           updateHand={this.updateHand.bind(this)}/>
         </div>
       </div>

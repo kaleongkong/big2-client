@@ -2,16 +2,12 @@ import React, {Component} from 'react';
 import Card from './card'
 
 class Hand extends Component {
-  constructor(props) {
-    super(props);
-    this.cards = []
-  }
 
   render() {
     let i = 0;
-    this.cards = []
+    const cards = []
     this.props.rawCards.forEach(function(rawCard){
-      this.cards.push(
+      cards.push(
         <Card 
         key={`${rawCard.pattern}_${rawCard.value}`} 
         id={i} 
@@ -33,7 +29,7 @@ class Hand extends Component {
       className='handLayout' 
       style={handStyle}
       ref={node => this.node = node}>
-        {this.cards}
+        {cards}
       </div>
       );
   }
