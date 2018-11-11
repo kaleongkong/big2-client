@@ -45,12 +45,12 @@ class PlayerSpace extends Component {
   handleClick(e) {
     const selectedCards = Object.values(this.state.selectedCards);
     const remainedRawCards = Object.values(this.state.remainedRawCards);
-    const params = {combination: selectedCards, user: this.props.current_player, end_game: remainedRawCards.length === 0, room_id: this.props.roomId}
+    const params = {
+      combination: selectedCards, 
+      user: this.props.current_player,
+      room_id: this.props.roomId}
     axios.post(SERVER_HOST + "/welcome/move", params)
       .then(response => {
-        console.log('playerSpace handleClick')
-        console.log(this.props)
-        console.log(response)
           if (response.data.error) {
             alert(response.data.error);
           } else if (this.props.sub) {
@@ -59,7 +59,8 @@ class PlayerSpace extends Component {
               selectedCards: {},
               remainedRawCards: this.rawCardsHelper(remainedRawCards)
             });
-            params.last_player = this.props.current_player
+            params.last_player = this.props.current_player;
+            params.end_game = response.data.end_game;
             this.props.sub.send(params);
             if (response.data.end_game) {
               alert('You win!')

@@ -54,8 +54,6 @@ class Room extends Component {
           const userId = response.data.user_id;
           const roomId = response.data.room_id;
           this.setUpSub(roomId);
-          console.log(this.state);
-          // debugger
           this.props.initUserAndUpdateLobby(userId, listOfRooms, roomId);
         })
         .catch(error => console.log(error))
