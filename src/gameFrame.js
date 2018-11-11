@@ -215,9 +215,6 @@ class GameFrame extends Component {
     }
     let content = '';
     switch (this.state.gameState) {
-      case -1:
-        content = <TextBox/>
-        break;
       case 0:
         content = <Lobby
           showCreateButton = {!this.state.user}

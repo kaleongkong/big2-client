@@ -9,42 +9,27 @@ class PlayerSpace extends Component {
     super(props);
     this.state = {
       rawCards: this.props.cards,
-      selectedCards: {},
-      remainedRawCards: this.rawCardsHelper(this.props.cards)
+      selectedCards: {}
     };
-  }
-
-  rawCardsHelper(cards) {
-    const remainedRawCards = {};
-    cards.forEach(function(card) {
-      const id = `${card.value}-${card.pattern}`;
-      remainedRawCards[id] = card;
-    });
-    return remainedRawCards;
   }
 
   updateHand(card) {
     const id = `${card.props.value}-${card.props.pattern}`;
     const newSelectedCards = Object.assign({}, this.state.selectedCards);
-    const newRemainedRawCards = Object.assign({}, this.state.remainedRawCards);
     if (this.state.selectedCards[id] && !card.state.selected) {
       delete newSelectedCards[id];
-      newRemainedRawCards[id] = card.dataObj();
     } else if (!this.state.selectedCards[id] && card.state.selected){
       newSelectedCards[id] = card.dataObj();
-      delete newRemainedRawCards[id];
     }
     if (Object.values(newSelectedCards).length !== Object.values(this.state.selectedCards).length) {
       this.setState({
         selectedCards: newSelectedCards,
-        remainedRawCards: newRemainedRawCards
       });
     }
   }
 
   handleClick(e) {
     const selectedCards = Object.values(this.state.selectedCards);
-    const remainedRawCards = Object.values(this.state.remainedRawCards);
     const params = {
       combination: selectedCards, 
       user: this.props.current_player,
@@ -55,9 +40,8 @@ class PlayerSpace extends Component {
             alert(response.data.error);
           } else if (this.props.sub) {
             this.setState({
-              rawCards: remainedRawCards,
+              rawCards: response.data.hand,
               selectedCards: {},
-              remainedRawCards: this.rawCardsHelper(remainedRawCards)
             });
             params.last_player = this.props.current_player;
             params.end_game = response.data.end_game;
