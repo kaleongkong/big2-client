@@ -185,12 +185,7 @@ class GameFrame extends Component {
   }
 
   handleDeleteRoom(rooms) {
-    this.setState({
-      rooms: rooms,
-      currentRoomId: null
-    });
-    this.removeUserId();
-    this.removeRoomId();
+    this.resetGameState();
     this.state.roomSub.send({userAction: 'delete'});
   }
 
@@ -201,7 +196,7 @@ class GameFrame extends Component {
     this.updateGameFrame({players_stats: users});
     setCookie('userId', '');
     setCookie('currentRoomId', '');
-    setCookie('gameState', '');
+    setCookie('gameState', 0);
     this.setState({
       user: null,
       recentCombination: []
