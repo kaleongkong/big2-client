@@ -2,9 +2,11 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import GameFrame from './gameFrame';
+import Card from './item/card';
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(<GameFrame />, document.getElementById('root'));
+// ReactDOM.render(<Card />, document.getElementById('root'));
 
 // If you want your app to work offline and load faster, you can change
 // unregister() to register() below. Note this comes with some pitfalls.
