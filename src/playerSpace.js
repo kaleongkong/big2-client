@@ -1,6 +1,7 @@
 import React, {Component} from 'react';
 import './playerSpace.css';
 import Hand from './hand';
+import GenericButton from './item/genericButton';
 import axios from 'axios';
 import {SERVER_HOST } from './api-config';
 
@@ -30,8 +31,6 @@ class PlayerSpace extends Component {
           if (response.data.error) {
             alert(response.data.error);
           } else if (this.props.sub) {
-            console.log('move');
-            console.log(selectedCards);
             this.props.updateCards(response.data.hand, {});
             params.last_player = this.props.current_player;
             params.end_game = response.data.end_game;
@@ -55,14 +54,12 @@ class PlayerSpace extends Component {
   render() {
     return (
       <div className='player-space'>
-        {this.props.buttonEnable ? (<div className='player-buttons'>
-          <button className='confirm-button' onClick={this.handleClick.bind(this)}>
-            Confirm
-          </button>
-          <button className='pass-button' onClick={this.handlePass.bind(this)}>
-            Pass
-          </button>
-        </div>) : ""}
+        <div className='player-buttons'>
+          <GenericButton text='Confirm' placeholder={true}/>
+          <GenericButton text='Confirm' handleClick={this.handleClick.bind(this)} disable={!this.props.buttonEnable}/>
+          <GenericButton text='Pass' handleClick={this.handlePass.bind(this)} disable={!this.props.buttonEnable}/>
+          <GenericButton text='Confirm' placeholder={true}/>
+        </div>
         <div className='player-hand'>
           <Hand
           rawCards={this.props.cards}

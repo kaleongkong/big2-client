@@ -3,6 +3,28 @@ import Card from './item/card'
 
 class Hand extends Component {
 
+  constructor(props) {
+    super(props)
+    this.state = {
+      marginBottom: 0
+    }
+  }
+
+  componentDidMount() {
+    this.adjustPosition()
+  }
+
+  componentDidUpdate() {
+    this.adjustPosition()
+  }
+
+  adjustPosition() {
+    const newmarginBottom = (this.node.parentNode.offsetHeight - this.node.offsetHeight) / 2;
+    if (Math.abs(newmarginBottom - this.state.marginBottom) > 2 && this.node.parentNode.offsetHeight > 0 && newmarginBottom > 0) {
+      this.setState({marginBottom: newmarginBottom});
+    }
+  }
+
   render() {
     let i = 0;
     const cards = []
@@ -22,7 +44,8 @@ class Hand extends Component {
     const handStyle = {
       position: 'absolute',
       bottom: 0,
-      padding: '3%'
+      paddingLeft: '3%',
+      marginBottom: this.state.marginBottom
     }
     return (
       <div 

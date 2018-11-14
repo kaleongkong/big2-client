@@ -241,7 +241,6 @@ class GameFrame extends Component {
       default:
         content = 
           (<div>
-            {this.state.user}
             <div style={centerDisplayStyle} className='center-display'>
               <CombinationDisplayBox rawCards={this.state.recentCombination}/>
             </div>

@@ -1,0 +1,45 @@
+/* Ripple effect */
+.ripple {
+  background-position: center;
+  transition: background 0.8s;
+}
+.ripple:hover {
+  background: #47a7f5 radial-gradient(circle, transparent 1%, #47a7f5 1%) center/15000%;
+}
+.ripple:active {
+  background-color: #6eb9f7;
+  background-size: 100%;
+  transition: background 0s;
+}
+
+/* Button style */
+.generic-button {
+  border: none;
+  border-radius: 5%;
+  padding: 12% 13%;
+  font-size: 11px;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: white;
+  background-color: #2196f3;
+  box-shadow: 0 0 4px #999;
+  outline: none;
+  width: 100%;
+}
+
+.generic-button-container {
+  width: 90%;
+  height: 20%;
+  padding: 5%;
+}
+
+.disable {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: 0 0 4px #999;
+}
+
+.placeholder {
+  opacity: 0;
+  pointer-events: none;
+}
