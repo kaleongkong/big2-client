@@ -15,5 +15,10 @@
   height: 80%;
   top: 10%;
   max-height: 50px;
-  border: 1px solid;
+  box-shadow: 0 0 10px #999;
+}
+
+.room-buttons-container {
+  padding: 0% 1% 0% 1%;
+  width: 20%;
 }

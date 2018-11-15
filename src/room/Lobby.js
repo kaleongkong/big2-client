@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import Room from './Room'
+import GenericButton from '../item/genericButton';
 import './Lobby.css'
 
 class Lobby extends Component {
@@ -26,7 +27,7 @@ class Lobby extends Component {
       rooms.push(roomNode)
     }.bind(this));
     return <div className='lobby'>
-      {this.props.showCreateButton ? <button onClick={this.handleCreateClick.bind(this)}> Create </button> : ''}
+      <GenericButton text='Create Room' handleClick={this.handleCreateClick.bind(this)} disable={!this.props.showCreateButton} lobbyButton={true}/>
       {rooms}
     </div>
   }

@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import { SERVER_HOST } from '../api-config';
+import GenericButton from '../item/genericButton';
 import axios from 'axios';
 import './Room.css'
 
@@ -86,10 +87,11 @@ class Room extends Component {
   render() {
     const is_participant = this.props.userIds.includes(this.props.currentPlayer);
     const is_owner = this.props.owner === this.props.currentPlayer;
-    const deleteButton = is_owner ? (<button onClick={this.handleDelete.bind(this)}> Delete </button>) : ""
-    const startButton = is_owner && this.props.userIds.length > 1 ? (<button onClick={this.handleStart.bind(this)}> Start </button>) : ""
-    const joinButton = !is_owner && !is_participant && !this.props.currentRoomId ? <button onClick={this.handleJoinClick.bind(this)}> Join </button> : "";
-    const leaveButton = !is_owner && is_participant ? <button onClick={this.handleLeaveClick.bind(this)}> Leave </button> : "";
+    const deleteButton = is_owner ? <GenericButton text='Delete' handleClick={this.handleDelete.bind(this)} disable={false} roomButton={true} alert={true}/> : "";
+    const startButton = is_owner && this.props.userIds.length > 1 ? <GenericButton text='Start' handleClick={this.handleStart.bind(this)} disable={false} roomButton={true}/> : "";
+    const joinButton = !is_owner && !is_participant && !this.props.currentRoomId ? <GenericButton text='Join' handleClick={this.handleJoinClick.bind(this)} disable={false} roomButton={true}/> : "";
+    const leaveButton = !is_owner && is_participant ? <GenericButton text='Leave' handleClick={this.handleLeaveClick.bind(this)} disable={false} roomButton={true} alert={true}/> : "";
+
     return <div className='room-container'>
       <div className='room'>
         <div> Room {this.props.roomId} </div>
@@ -98,7 +100,7 @@ class Room extends Component {
         <div>
           {this.props.status}
         </div>
-        <div>
+        <div className='room-buttons-container'>
           {joinButton}
           {leaveButton}
           {startButton}

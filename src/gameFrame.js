@@ -29,6 +29,7 @@ class GameFrame extends Component {
   }
 
   componentDidMount() {
+    window.addEventListener("resize", this.positionFrame.bind(this));
     if (this.state.gameState !== 0) {
       const url = SERVER_HOST + "/welcome/rejoin";
       const params = {
@@ -51,11 +52,35 @@ class GameFrame extends Component {
     } else if (this.state.rooms.length === 0) {
       this.getRooms();
     }
-    this.setState(
-      {
-        roomSub: this.cable.subscriptions.create('RoomChannel', {
-      received: this.updateLobby.bind(this)})
-    });
+    const newState = {roomSub: this.cable.subscriptions.create('RoomChannel', {received: this.updateLobby.bind(this)})};
+    const newMarginLeft = (this.node.parentNode.offsetWidth - this.node.offsetWidth) / 2;
+    if (newMarginLeft > 0 && newMarginLeft != this.state.marginLeft) {
+      newState.marginLeft = newMarginLeft;
+    }
+    this.setState(newState);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.positionFrame.bind(this));
+  }
+
+  positionFrame() {
+    if (this.node) {
+      const newMarginLeft = (this.node.parentNode.offsetWidth - this.node.offsetWidth) / 2;
+      if (newMarginLeft > 0 && newMarginLeft != this.state.marginLeft) {
+        const newState = {marginLeft: newMarginLeft};
+        this.setState(newState);
+      }
+    }
+  }
+
+  componentDidUpdate() {
+    const newMarginLeft = (this.node.parentNode.offsetWidth - this.node.offsetWidth) / 2;
+    console.log(newMarginLeft);
+    if (Math.abs(newMarginLeft - this.state.marginLeft) > 1) {
+      const newState = {marginLeft: newMarginLeft};
+      this.setState(newState);
+    }
   }
 
   createRoom() {
@@ -215,6 +240,20 @@ class GameFrame extends Component {
     this.setState(newState);
   }
 
+  removeUserId() {
+   setCookie('userId', '');
+   this.setState({
+     user: null
+   })
+  }
+
+  removeRoomId() {
+   setCookie('currentRoomId', '');
+   this.setState({
+     currentRoomId: null
+   })
+  }
+
   render() {
     const centerDisplayStyle = {
       position: 'absolute',
@@ -257,13 +296,16 @@ class GameFrame extends Component {
             roomId = {this.state.currentRoomId} /></div>)
         break;
     }
+    const frameStyle = {
+      marginLeft: this.state.marginLeft
+    }
     return (
-      <div className='game-frame'>
+      <div className='game-frame' style={frameStyle} ref={node => this.node = node}>
       <div>
         room id: {this.state.currentRoomId}
         <br></br>
         user id: {this.state.user}
-        { true ? (<div><button onClick={this.resetGameState.bind(this)}> Reset </button></div>) : ""}
+        { false ? (<div><button onClick={this.resetGameState.bind(this)}> Reset </button></div>) : ""}
       </div>
         {content}
       </div>
