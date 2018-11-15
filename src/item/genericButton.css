@@ -5,6 +5,7 @@
 }
 .ripple:hover {
   background: #47a7f5 radial-gradient(circle, transparent 1%, #47a7f5 1%) center/15000%;
+  box-shadow: 1px 1px 4px #999;
 }
 .ripple:active {
   background-color: #6eb9f7;
@@ -22,7 +23,7 @@
   cursor: pointer;
   color: white;
   background-color: #2196f3;
-  box-shadow: 0 0 4px #999;
+  box-shadow: 0 0 2px #999;
   outline: none;
   width: 100%;
 }

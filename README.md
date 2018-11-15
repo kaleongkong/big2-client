@@ -1,4 +1,5 @@
-1. Add Quit button.
+1. Combination and Room Display UI upgrade.
+2. Add Quit button.
 3. Add opponent's state on the display box.
 5. Add shuffle and sort button.
 
