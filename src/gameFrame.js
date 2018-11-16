@@ -302,10 +302,8 @@ class GameFrame extends Component {
     return (
       <div className='game-frame' style={frameStyle} ref={node => this.node = node}>
       <div>
-        room id: {this.state.currentRoomId}
-        <br></br>
-        user id: {this.state.user}
-        { false ? (<div><button onClick={this.resetGameState.bind(this)}> Reset </button></div>) : ""}
+        room id: {this.state.currentRoomId}, user id: {this.state.user}
+        { true ? (<div><button onClick={this.resetGameState.bind(this)}> Reset </button></div>) : ""}
       </div>
         {content}
       </div>

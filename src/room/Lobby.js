@@ -28,6 +28,7 @@ class Lobby extends Component {
     }.bind(this));
     return <div className='lobby'>
       <GenericButton text='Create Room' handleClick={this.handleCreateClick.bind(this)} disable={!this.props.showCreateButton} lobbyButton={true}/>
+      <Room header={true}/>
       {rooms}
     </div>
   }

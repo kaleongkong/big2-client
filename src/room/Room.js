@@ -35,16 +35,11 @@ class Room extends Component {
 
   renderPlayerSection() {
     const users = []
-    const userRowStyle = {
-      display: 'flex',
-    }
-    const nameSpaceStyle = {
-      margin: '2%'
-    }
     for (let i=0; i < this.props.userIds.length; i++) {
-      users.push(<div key={i} style={nameSpaceStyle}> {this.props.userIds[i]} </div>)
+      users.push(<div key={i} className='name-space'> 
+        {this.props.userIds[i]} </div>)
     }
-    return <div style={userRowStyle}> {users} </div>
+    return <div className='user-row'> {users} </div>
   }
 
   handleJoinClick() {
@@ -84,22 +79,41 @@ class Room extends Component {
     this.state.sub.send({user: String(this.props.currentPlayer), room_id: this.props.currentRoomId})
   }
 
+  isAvailable() {
+    return this.props.available && !this.props.header && this.props.userIds.length < this.props.roomLimit;
+  }
+
+  renderStatus() {
+    const available = this.isAvailable()
+    const className = `room-status-container ${available ? 'available' : 'full'}`
+    return <div className={className}>
+      {this.props.header ? 'Status' : (available ? 'Available' : 'Full') }
+    </div>
+  }
+
   render() {
     const is_participant = this.props.userIds.includes(this.props.currentPlayer);
     const is_owner = this.props.owner === this.props.currentPlayer;
-    const deleteButton = is_owner ? <GenericButton text='Delete' handleClick={this.handleDelete.bind(this)} disable={false} roomButton={true} alert={true}/> : "";
-    const startButton = is_owner && this.props.userIds.length > 1 ? <GenericButton text='Start' handleClick={this.handleStart.bind(this)} disable={false} roomButton={true}/> : "";
-    const joinButton = !is_owner && !is_participant && !this.props.currentRoomId ? <GenericButton text='Join' handleClick={this.handleJoinClick.bind(this)} disable={false} roomButton={true}/> : "";
+    const deleteButton = is_owner ? <GenericButton text='Delete' handleClick={this.handleDelete.bind(this)} disable={false} roomButton={true} alert={true}  placeholder={this.props.header}/> : "";
+    const startButton = is_owner && this.props.userIds.length > 1 ? <GenericButton text='Start' handleClick={this.handleStart.bind(this)} disable={false} roomButton={true}  placeholder={this.props.header}/> : "";
+    
+    const showJoinButton = !is_owner && !is_participant && !this.props.currentRoomId
+    const joinButton = showJoinButton ? <GenericButton text='Join' handleClick={this.handleJoinClick.bind(this)} disable={!this.isAvailable()} roomButton={true}/> : "";
     const leaveButton = !is_owner && is_participant ? <GenericButton text='Leave' handleClick={this.handleLeaveClick.bind(this)} disable={false} roomButton={true} alert={true}/> : "";
 
+    const roomClassName = `room ${this.props.header ? 'header' : ''}`
     return <div className='room-container'>
-      <div className='room'>
-        <div> Room {this.props.roomId} </div>
-        {this.renderPlayerSection()}
-        <div> limit {this.props.userIds.length}/{this.props.roomLimit} </div>
-        <div>
-          {this.props.status}
+      <div className={roomClassName}>
+        <div className='room-id-container'> 
+          {this.props.header ? 'Room' : `${this.props.roomId}` }
         </div>
+        <div className='room-players-container'>
+          {this.props.header ? 'Players' : this.renderPlayerSection() }
+        </div>
+        <div className='room-limit-container'>
+          {this.props.header ? '#/#' : `${this.props.userIds.length}/${this.props.roomLimit}` }
+        </div>
+        {this.renderStatus()}
         <div className='room-buttons-container'>
           {joinButton}
           {leaveButton}
@@ -112,13 +126,18 @@ class Room extends Component {
 }
 
 Room.defaultProps = {
+  header: false,
   roomId: null,
   userIds: ['18293040', '23452345', '87948342', '23452344'],
   roomLimit: 4,
-  status: 'Waiting...',
+  available: true,
   owner: null,
   currentRoomId: null,
-  currentPlayer: null
+  currentPlayer: null,
+  updateGameFrame: function(){},
+  initUserAndUpdateLobby: function(){},
+  handleLeaveRoom: function(){},
+  handleDeleteRoom: function(){}
 }
 
 export default Room;
