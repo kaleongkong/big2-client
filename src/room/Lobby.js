@@ -16,6 +16,7 @@ class Lobby extends Component {
                             currentPlayer={this.props.currentPlayer}
                             currentRoomId={this.props.currentRoomId}
                             roomId={room.id}
+                            status={room.status}
                             key={room.id}
                             roomLimit={room.limit}
                             owner = {room.owner}

@@ -80,14 +80,19 @@ class Room extends Component {
   }
 
   isAvailable() {
-    return this.props.available && !this.props.header && this.props.userIds.length < this.props.roomLimit;
+    return this.props.status === 0 && !this.props.header && this.props.userIds.length < this.props.roomLimit;
+  }
+
+  isStarted() {
+    return this.props.status === 2
   }
 
   renderStatus() {
-    const available = this.isAvailable()
-    const className = `room-status-container ${available ? 'available' : 'full'}`
+    const available = this.isAvailable();
+    const started = this.isStarted();
+    const className = `room-status-container ${available ? 'available' : (started ? 'started' : 'full')}`
     return <div className={className}>
-      {this.props.header ? 'Status' : (available ? 'Available' : 'Full') }
+      {this.props.header ? 'Status' : (available ? 'Available' : (started ? 'Started' : 'Full')) }
     </div>
   }
 
@@ -130,7 +135,7 @@ Room.defaultProps = {
   roomId: null,
   userIds: ['18293040', '23452345', '87948342', '23452344'],
   roomLimit: 4,
-  available: true,
+  status: 0,
   owner: null,
   currentRoomId: null,
   currentPlayer: null,

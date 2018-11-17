@@ -49,6 +49,11 @@
   font-weight: bold;
 }
 
+.room-status-container.started {
+  color: #e50000;
+  font-weight: bold;
+}
+
 .room-buttons-container {
   padding: 0% 1% 0% 1%;
   width: 20%;

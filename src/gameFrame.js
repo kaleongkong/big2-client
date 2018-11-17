@@ -182,6 +182,7 @@ class GameFrame extends Component {
     } else {
       this.setState({currentRoomId: data.room_id})
     }
+    this.state.roomSub.send({userAction: 'started'});
   }
 
   updateRecentCombination(data) {

@@ -6,9 +6,8 @@ Tasks:
 
 Bugs:
 P1
-- King Full House shouldn't be bigger than Dee Full House
+3,4,9,j,q vs 4,6,8,q,2 --> spade vs diamond
 - 2,3,4,5,6 should be valid but invalid
-- 3,4,5,6,7 vs 4,5,6,7,8
 - Self should not pass if it's back to your turn.
 - Join button should be disabled to all users if a game is started.
 - Game doesn't start with the browser is minimized.
@@ -16,3 +15,10 @@ P1
 - user should see "Started" for room when other players in it playing and user in lobby.
 P2
 - 2 browser, same account, create room in one, another doesn't update properly
+
+Backlog
+
+
+Potential
+- King Full House shouldn't be bigger than Dee Full House
+- 3,4,5,6,7 vs 4,5,6,7,8
