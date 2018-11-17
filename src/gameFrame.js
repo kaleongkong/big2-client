@@ -1,23 +1,24 @@
 import React, {Component} from 'react';
-import TextBox from './textBox';
 import PlayerSpace from './playerSpace';
 import CombinationDisplayBox from './combinationDisplayBox';
-import Room from './Room';
 import ActionCable from 'actioncable'
 import { SERVER_HOST, WEBSOCKET_HOST } from './api-config';
+import {setCookie, getCookie} from './utils/helper'
 import './playerSpace.css';
 import './gameFrame.css';
 import axios from 'axios';
 import Lobby from './room/Lobby';
 
 const initialState = {
-  gameState: 0,
+  gameState: parseInt(getCookie('gameState')) || 0,
   recentCombination: [],
   cards: [],
-  sub: null,
+  selectedCards: {},
   moveSub: null,
-  user: null,
-  roomId: null
+  roomSub: null,
+  user: getCookie('userId'),
+  currentRoomId: getCookie('currentRoomId'),
+  rooms: []
 };
 
 class GameFrame extends Component {
@@ -28,11 +29,135 @@ class GameFrame extends Component {
   }
 
   componentDidMount() {
-    this.setState(
-      {
-        sub: this.cable.subscriptions.create('NotesChannel', {
-      received: this.updateGameFrame.bind(this)}),
-    });
+    window.addEventListener("resize", this.positionFrame.bind(this));
+    if (this.state.gameState !== 0) {
+      const url = SERVER_HOST + "/welcome/rejoin";
+      const params = {
+        user_id: this.state.user,
+        room_id: this.state.currentRoomId
+      }
+      axios.post(url, params)
+        .then(response => {
+            const newState = {
+              recentCombination: response.data.last_combination,
+              cards: response.data.hand
+            }
+            if (!this.state.moveSub) {
+              newState.moveSub = this.cable.subscriptions.create({channel: 'MovesChannel', roomId: this.state.currentRoomId}, 
+                {received: this.updateRecentCombination.bind(this)})
+            }
+            this.setState(newState);
+          })
+          .catch(error => console.log(error));
+    } else if (this.state.rooms.length === 0) {
+      this.getRooms();
+    }
+    const newState = {roomSub: this.cable.subscriptions.create('RoomChannel', {received: this.updateLobby.bind(this)})};
+    const newMarginLeft = (this.node.parentNode.offsetWidth - this.node.offsetWidth) / 2;
+    if (newMarginLeft > 0 && newMarginLeft != this.state.marginLeft) {
+      newState.marginLeft = newMarginLeft;
+    }
+    this.setState(newState);
+  }
+
+  componentWillUnmount() {
+    window.removeEventListener("resize", this.positionFrame.bind(this));
+  }
+
+  positionFrame() {
+    if (this.node) {
+      const newMarginLeft = (this.node.parentNode.offsetWidth - this.node.offsetWidth) / 2;
+      if (newMarginLeft > 0 && newMarginLeft != this.state.marginLeft) {
+        const newState = {marginLeft: newMarginLeft};
+        this.setState(newState);
+      }
+    }
+  }
+
+  componentDidUpdate() {
+    const newMarginLeft = (this.node.parentNode.offsetWidth - this.node.offsetWidth) / 2;
+    console.log(newMarginLeft);
+    if (Math.abs(newMarginLeft - this.state.marginLeft) > 1) {
+      const newState = {marginLeft: newMarginLeft};
+      this.setState(newState);
+    }
+  }
+
+  createRoom() {
+    const url = SERVER_HOST + "/welcome/create_room";
+    axios.post(url)
+      .then(response => {
+          const userId = response.data.user_id;
+          const rooms = response.data.rooms;
+          const roomId = response.data.room_id;
+          setCookie('userId', userId);
+          setCookie('currentRoomId', roomId);
+          this.setStateForNewUser(userId, rooms, roomId)
+          this.state.roomSub.send({userAction: 'create'});
+        })
+        .catch(error => console.log(error));
+  }
+
+  initUserAndUpdateLobby(userId, rooms, roomId) {
+    setCookie('userId', userId);
+    setCookie('currentRoomId', roomId);
+    this.setStateForNewUser(userId, rooms, roomId)
+    this.state.roomSub.send({userAction: 'join'});
+  }
+
+  setStateForNewUser(userId, rooms, roomId) {
+    const stateParams = {
+      user: userId,
+      rooms: rooms,
+      currentRoomId: roomId
+    }
+    if (roomId !== this.state.currentRoomId) {
+      stateParams.moveSub = this.cable.subscriptions.create({channel: 'MovesChannel', roomId: roomId}, {received: this.updateRecentCombination.bind(this)})
+    }
+    this.setState(stateParams);
+  }
+
+  handleLeaveRoom(data) {
+    this.updateLobby(data);
+    this.removeUserId();
+    this.removeRoomId();
+    this.state.roomSub.send({userAction: 'leave'});
+  }
+
+  getRooms() {
+    const url = SERVER_HOST + "/welcome/get_rooms";
+    axios.get(url)
+      .then(response => {
+          const listOfRooms = response.data.rooms;
+          this.setState({
+            rooms: listOfRooms
+          });
+        })
+        .catch(error => console.log(error))
+  }
+
+  updateLobby(data) {
+    const listOfRooms = data.rooms;
+    const params = {
+      rooms: listOfRooms
+    };
+    if (data.userAction === 'delete'){
+      let roomExist = false;
+      let i;
+      for (i = 0; i < listOfRooms.length && !roomExist; i++) {
+        let room = listOfRooms[i]
+        if (room.id === this.state.currentRoomId) {
+          roomExist = true;
+        }
+      }
+      if (this.state.currentRoomId && !roomExist){
+        params.currentRoomId = null;
+        params.user = null;
+        setCookie('currentRoomId', '');
+        setCookie('userId', '');
+      }
+    }
+    this.setState(params);
   }
 
   updateUser(userId) {
@@ -42,20 +167,20 @@ class GameFrame extends Component {
   }
 
   updateGameFrame(data){
-    console.log(`this.state.user: ${this.state.user}`)
     if (this.state.user && this.state.gameState !== data.players_stats[this.state.user].game_state) {
       const stateParams = {
         gameState: data.players_stats[this.state.user].game_state, 
         cards: data.players_stats[this.state.user].deck,
-        roomId: data.room_id
+        currentRoomId: data.room_id
       }
-      if (!this.state.moveSub && data.room_id) {
-        stateParams.moveSub = this.cable.subscriptions.create({channel: 'MovesChannel', roomId: data.room_id}, {
-      received: this.updateRecentCombination.bind(this)})
+      // Not necessary to check room_id, room_id has been checked in create room or join room 
+      if (!this.state.moveSub) {
+        stateParams.moveSub = this.cable.subscriptions.create({channel: 'MovesChannel', roomId: data.room_id}, {received: this.updateRecentCombination.bind(this)})
       }
+      setCookie('gameState', stateParams.gameState);
       this.setState(stateParams);
     } else {
-      this.setState({roomId: data.room_id})
+      this.setState({currentRoomId: data.room_id})
     }
   }
 
@@ -67,7 +192,9 @@ class GameFrame extends Component {
     const users = {}
     users[this.state.user] = {}
     users[this.state.user].game_state = data.players_stats.users[this.state.user].game_state
-    this.updateGameFrame({players_stats: users, room_id: this.state.roomId})
+    users[this.state.user].deck = data.players_stats.users[this.state.user].hand
+    console.log(users);
+    this.updateGameFrame({players_stats: users, room_id: this.state.currentRoomId})
     if (data.end_game && data.user !== this.state.user) {
       alert('You Lose!')
       this.resetGameState();
@@ -75,11 +202,16 @@ class GameFrame extends Component {
   }
 
   resetGame() {
-    axios.get(SERVER_HOST + "/welcome/reset?room_id=" + this.state.roomId)
+    axios.get(SERVER_HOST + "/welcome/reset?room_id=" + this.state.currentRoomId)
       .then(response => {
             this.resetGameState();
           })
         .catch(error => console.log(error))
+  }
+
+  handleDeleteRoom(rooms) {
+    this.resetGameState();
+    this.state.roomSub.send({userAction: 'delete'});
   }
 
   resetGameState() {
@@ -87,11 +219,39 @@ class GameFrame extends Component {
     users[this.state.user] = {}
     users[this.state.user].game_state = 0
     this.updateGameFrame({players_stats: users});
-    console.log(this.state);
+    setCookie('userId', '');
+    setCookie('currentRoomId', '');
+    setCookie('gameState', 0);
     this.setState({
       user: null,
       recentCombination: []
     });
+    this.state.roomSub.send({userAction: 'endGame'});
+  }
+
+  updateCards(cards, selectedCards) {
+    const newState = {}
+    if (cards) {
+      newState.cards = cards;
+    }
+    if (selectedCards) {
+      newState.selectedCards = selectedCards;
+    }
+    this.setState(newState);
+  }
+
+  removeUserId() {
+   setCookie('userId', '');
+   this.setState({
+     user: null
+   })
+  }
+
+  removeRoomId() {
+   setCookie('currentRoomId', '');
+   this.setState({
+     currentRoomId: null
+   })
   }
 
   render() {
@@ -104,40 +264,46 @@ class GameFrame extends Component {
     }
     let content = '';
     switch (this.state.gameState) {
-      case -1:
-        content = <TextBox/>
-        break;
       case 0:
-        content = <Room
-            updateGameFrame={this.updateGameFrame.bind(this)}
-            updateUser = {this.updateUser.bind(this)}
-            resetGame= {this.resetGame.bind(this)}
-            roomId = {this.state.roomId}
-            sub = {this.state.sub}/>
+        content = <Lobby
+          showCreateButton = {!this.state.user}
+          currentRoomId = {this.state.currentRoomId} 
+          rooms = {this.state.rooms}
+          createRoom = {this.createRoom.bind(this)}
+          currentPlayer = {this.state.user}
+          cable = {this.cable}
+          initUserAndUpdateLobby = {this.initUserAndUpdateLobby.bind(this)}
+          updateGameFrame = {this.updateGameFrame.bind(this)}
+          handleLeaveRoom = {this.handleLeaveRoom.bind(this)}
+          handleDeleteRoom = {this.handleDeleteRoom.bind(this)}/>
         break;
       default:
-        console.log(`this.state.roomId: ${this.state.roomId}`)
         content = 
           (<div>
-            {this.state.user}
             <div style={centerDisplayStyle} className='center-display'>
               <CombinationDisplayBox rawCards={this.state.recentCombination}/>
             </div>
             <PlayerSpace 
             updateRecentCombination={this.updateRecentCombination.bind(this)}
             updateGameFrame={this.updateGameFrame.bind(this)}
+            updateCards={this.updateCards.bind(this)}
+            selectedCards={this.state.selectedCards}
             resetGame= {this.resetGame.bind(this)}
             sub = {this.state.moveSub} 
             cards = {this.state.cards}
             current_player= {this.state.user}
             buttonEnable = {this.state.gameState === 1}
-            roomId = {this.state.roomId} /></div>)
+            roomId = {this.state.currentRoomId} /></div>)
         break;
     }
+    const frameStyle = {
+      marginLeft: this.state.marginLeft
+    }
     return (
-      <div className='game-frame'>
+      <div className='game-frame' style={frameStyle} ref={node => this.node = node}>
       <div>
-        room id: {this.state.roomId}
+        room id: {this.state.currentRoomId}, user id: {this.state.user}
+        { true ? (<div><button onClick={this.resetGameState.bind(this)}> Reset </button></div>) : ""}
       </div>
         {content}
       </div>

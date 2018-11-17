@@ -1,0 +1,52 @@
+.card-container {
+  height: 75px;
+  width: 44px;
+  display: inline-block;
+  position: relative;
+  border: 1.5px solid;
+  font-size: 10px;
+  border-radius: 3px;
+  background: #fff;
+}
+
+.card-inner-container {
+  height: 95%;
+  width: 95%;
+  margin: 2.5%;
+}
+
+.card-top {
+  height: 17.5%;
+  width: 100%;
+}
+
+.card-pattern-container {
+  height: 65%;
+  width: 100%;
+}
+
+.card-bottom {
+  height: 17.5%;
+  width: 100%;
+  text-align: right;
+}
+
+.card-pattern {
+  height: 80%;
+  width: 80%;
+  margin: 10%;
+}
+
+.card-text {
+  height: 100%;
+  width: 100%;
+  vertical-align: middle;
+}
+
+.red-text {
+  color: #CC0000;
+}
+
+.up {
+  top: -10px;
+}

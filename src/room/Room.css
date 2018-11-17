@@ -1,0 +1,64 @@
+.room-container {
+  position: relative;
+  width: 100%;
+  height: 10%;
+  max-height: 50px;
+  font-size: 12px;
+}
+
+.room {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 80%;
+  bottom: 10%;
+  max-height: 50px;
+  box-shadow: 0 0 10px #999;
+}
+
+.room.header {
+  font-weight: bold;
+  box-shadow: 0 0 0 #999 !important;
+}
+
+.room-id-container {
+  padding: 0% 1% 0% 1%;
+  width: 15%;
+}
+
+.room-players-container {
+  width: 35%;
+}
+
+.room-limit-container {
+  width: 10%;
+}
+
+.room-status-container {
+  width: 10%;
+}
+
+.room-status-container.available {
+  color: #32CD32;
+  font-weight: bold;
+}
+
+.room-status-container.full {
+  font-weight: bold;
+}
+
+.room-buttons-container {
+  padding: 0% 1% 0% 1%;
+  width: 20%;
+}
+
+.user-row {
+  /*display: flex;*/
+}
+
+.name-space {
+  margin: 2%;
+  display: inline-block;
+}
