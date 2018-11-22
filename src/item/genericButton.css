@@ -53,6 +53,10 @@
   background-color: #e50000;
 }
 
+.generic-button.alert.ripple:hover {
+  background: #ff3232 radial-gradient(circle, transparent 1%, #ff3232 1%) center/15000% !important;
+}
+
 .generic-button-container.room-button {
   width: 40%;
   height: 100%;

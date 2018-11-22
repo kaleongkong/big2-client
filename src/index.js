@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import GameFrame from './gameFrame';
+import GameFrame from './game_frame/game-frame';
 import Card from './item/card';
 import * as serviceWorker from './serviceWorker';
 

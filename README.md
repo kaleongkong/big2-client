@@ -6,7 +6,9 @@ Tasks:
 
 Bugs:
 P1
-3,4,9,j,q vs 4,6,8,q,2 --> spade vs diamond
+- button activation should be controlled by server.
+- if browser comes back from minimize state, gameFrame doesn't get update until you refresh it.
+- 3,4,9,j,q vs 4,6,8,q,2 --> spade vs diamond
 - 2,3,4,5,6 should be valid but invalid
 - Self should not pass if it's back to your turn.
 - Join button should be disabled to all users if a game is started.

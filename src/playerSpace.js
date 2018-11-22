@@ -55,10 +55,10 @@ class PlayerSpace extends Component {
     return (
       <div className='player-space'>
         <div className='player-buttons'>
-          <GenericButton text='Confirm' placeholder={true} playerSpace={true}/>
           <GenericButton text='Confirm' handleClick={this.handleClick.bind(this)} disable={!this.props.buttonEnable} playerSpace={true}/>
           <GenericButton text='Pass' handleClick={this.handlePass.bind(this)} disable={!this.props.buttonEnable} playerSpace={true}/>
           <GenericButton text='Confirm' placeholder={true} playerSpace={true}/>
+          <GenericButton text='Quit' playerSpace={true} alert={true}/>
         </div>
         <div className='player-hand'>
           <Hand
