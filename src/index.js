@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
 import GameFrame from './game_frame/game-frame';
-import Card from './item/card';
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(<GameFrame />, document.getElementById('root'));
